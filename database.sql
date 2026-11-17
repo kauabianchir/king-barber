@@ -11,7 +11,7 @@ create index bookings_pending_expiry on private.bookings(start) where status='pe
 create table private.occupancy(slot timestamptz primary key,booking_id uuid not null references private.bookings(id));
 create index occupancy_booking on private.occupancy(booking_id);
 create table private.releases(slot timestamptz primary key);
-create table private.expenses(id uuid primary key default gen_random_uuid(),day date not null,description text not null,amount integer not null check(amount between 1 and 100000000));
+create table private.expenses(id uuid primary key default gen_random_uuid(),day date not null,description text not null,amount integer not null check(amount between 1 and 100000000),deleted_at timestamptz,deleted_by uuid references auth.users(id));
 create index expenses_day on private.expenses(day desc);
 create table private.notifications(id text primary key,target text not null,kind text not null,title text not null,message text not null,created timestamptz not null default now(),read_at timestamptz);
 create index notifications_target_created on private.notifications(target,created desc);
@@ -25,7 +25,7 @@ alter table private.notifications enable row level security;
 revoke all on all tables in schema private from public,anon,authenticated;
 
 insert into private.services(id,name,minutes,price,sunday,active) values
- ('corte','Corte',60,5000,0,1),('combo','Corte e barba',90,7500,0,1),('noivo','Dia do Noivo',180,35000,1,0);
+ ('corte','Corte',60,5000,0,1),('combo','Corte e barba',90,7500,0,1),('noivo','Dia do Noivo',180,35000,1,1);
 
 create function private.notify(event_id text,event_kind text,event_title text,event_message text,recipient uuid default null)
 returns void language sql set search_path='' as $$
@@ -43,7 +43,7 @@ declare
  start_at timestamptz; end_at timestamptz; booking_day date; time_text text; minute integer;
  released boolean; urgent boolean; booked_id uuid; amount_value integer; description_value text;
  customer_name text; customer_phone text; customer_birth date; customer_email text;
- result jsonb; rows_json jsonb; services_json jsonb; expenses_json jsonb; notices_json jsonb;
+ result jsonb; rows_json jsonb; services_json jsonb; expenses_json jsonb; notices_json jsonb; archived_expenses_json jsonb;
 begin
  if uid is null then return jsonb_build_object('status',401,'body',jsonb_build_object('error','Entre na sua conta para continuar.')); end if;
  select id,email,email_confirmed_at,raw_user_meta_data into u from auth.users where id=uid;
@@ -62,9 +62,10 @@ begin
  if op='data' then
   select coalesce(jsonb_agg(to_jsonb(q) order by q.price),'[]'::jsonb) into services_json from private.services q;
   select coalesce(jsonb_agg(to_jsonb(q) order by q.start desc),'[]'::jsonb) into rows_json from (select * from private.bookings where is_admin or user_id=uid order by start desc limit 2000)q;
-  if is_admin then select coalesce(jsonb_agg(to_jsonb(q) order by q.day desc),'[]'::jsonb) into expenses_json from (select * from private.expenses order by day desc limit 2000)q; else expenses_json:='[]'::jsonb; end if;
+  if is_admin then select coalesce(jsonb_agg(to_jsonb(q) order by q.day desc),'[]'::jsonb) into expenses_json from (select * from private.expenses where deleted_at is null order by day desc limit 2000)q; else expenses_json:='[]'::jsonb; end if;
+  if is_admin then select coalesce(jsonb_agg(to_jsonb(q) order by q.day desc),'[]'::jsonb) into archived_expenses_json from (select * from private.expenses where deleted_at is not null order by day desc limit 2000)q; else archived_expenses_json:='[]'::jsonb; end if;
   select coalesce(jsonb_agg(to_jsonb(q) order by q.created desc),'[]'::jsonb) into notices_json from (select * from private.notifications where target=uid::text or (is_admin and target='admin') order by created desc limit 50)q;
-  return jsonb_build_object('status',200,'body',jsonb_build_object('user',jsonb_build_object('id',uid,'email',u.email,'name',coalesce(nullif(u.raw_user_meta_data->>'full_name',''),u.email),'admin',is_admin),'services',services_json,'bookings',rows_json,'expenses',expenses_json,'notifications',notices_json));
+  return jsonb_build_object('status',200,'body',jsonb_build_object('user',jsonb_build_object('id',uid,'email',u.email,'name',coalesce(nullif(u.raw_user_meta_data->>'full_name',''),u.email),'admin',is_admin),'services',services_json,'bookings',rows_json,'expenses',expenses_json,'deletedExpenses',archived_expenses_json,'notifications',notices_json));
  end if;
 
  if op='readNotifications' then
@@ -140,6 +141,16 @@ begin
   booked_id:=gen_random_uuid();insert into private.expenses(id,day,description,amount) values(booked_id,(payload->>'day')::date,description_value,amount_value);
   perform private.notify(booked_id::text,'expense','Despesa adicionada',description_value||' · R$ '||replace(to_char(amount_value/100.0,'FM999999990.00'),'.',','));
   return jsonb_build_object('status',201,'body',jsonb_build_object('message','Despesa registrada.'));
+ end if;
+ if op in ('deleteExpense','restoreExpense') then
+  if op='deleteExpense' then
+   update private.expenses set deleted_at=now(),deleted_by=uid where id=(payload->>'id')::uuid and deleted_at is null returning id,description into booked_id,description_value;
+  else
+   update private.expenses set deleted_at=null,deleted_by=null where id=(payload->>'id')::uuid and deleted_at is not null returning id,description into booked_id,description_value;
+  end if;
+  if not found then raise exception 'Despesa não encontrada ou já atualizada.'; end if;
+  perform private.notify(gen_random_uuid()::text,'expense',case when op='deleteExpense' then 'Despesa excluída' else 'Despesa restaurada' end,description_value);
+  return jsonb_build_object('status',200,'body',jsonb_build_object('message',case when op='deleteExpense' then 'Despesa excluída dos totais. Você pode restaurá-la em Despesas excluídas.' else 'Despesa restaurada nos totais.' end));
  end if;
  if op='service' then
   amount_value:=(payload->>'price')::integer;minute:=(payload->>'minutes')::integer;

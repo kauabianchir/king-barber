@@ -13,7 +13,7 @@ test('antecedência exata de 2 horas é aceita',()=>assert.equal(validateBooking
 test('vaga liberada permite encaixe imediato',()=>assert.equal(validateBooking(cut,'2026-11-17','10:00',now,true).urgent,true));
 test('vaga liberada não permite horário passado',()=>assert.throws(()=>validateBooking(cut,'2026-11-17','09:30',now,true),/passou/));
 test('corte comum indisponível aos domingos',()=>assert.throws(()=>validateBooking(cut,'2026-11-22','10:00',now),/Domingo/));
-test('Dia do Noivo desativado até definir condições',()=>assert.throws(()=>validateBooking(groom,'2026-11-22','10:00',now),/indisponível/));
+test('Serviço desativado pela administração não aceita reserva',()=>assert.throws(()=>validateBooking({...groom,active:0},'2026-11-22','10:00',now),/indisponível/));
 test('Dia do Noivo ativo disponível somente domingo',()=>{const s={...groom,active:1};assert.ok(validateBooking(s,'2026-11-22','10:00',now));assert.throws(()=>validateBooking(s,'2026-11-21','10:00',now),/domingo/);});
 test('rejeita datas inexistentes e horários fora da grade',()=>{assert.equal(validDay('2026-02-30'),false);assert.throws(()=>validateBooking(cut,'2026-11-18','09:15',now),/inválido/);});
 test('limita agenda a 90 dias',()=>assert.throws(()=>validateBooking(cut,'2027-06-01','10:00',now),/90 dias/));

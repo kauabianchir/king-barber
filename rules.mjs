@@ -1,5 +1,5 @@
 export const HOUR=3600000;
-export const DEFAULT_SERVICES=[{id:'corte',name:'Corte',minutes:60,price:5000,sunday:0,active:1},{id:'combo',name:'Corte e barba',minutes:90,price:7500,sunday:0,active:1},{id:'noivo',name:'Dia do Noivo',minutes:180,price:35000,sunday:1,active:0}];
+export const DEFAULT_SERVICES=[{id:'corte',name:'Corte',minutes:60,price:5000,sunday:0,active:1},{id:'combo',name:'Corte e barba',minutes:90,price:7500,sunday:0,active:1},{id:'noivo',name:'Dia do Noivo',minutes:180,price:35000,sunday:1,active:1}];
 export function localDay(now=new Date()){return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);}
 export function instant(day,time){return new Date(`${day}T${time}:00-03:00`);}
 export function validDay(day){return /^\d{4}-\d{2}-\d{2}$/.test(day)&&!Number.isNaN(instant(day,'12:00').getTime())&&localDay(instant(day,'12:00'))===day;}
