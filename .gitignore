@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.supabase/
+supabase/.temp/
+.env*
+postgres-test-results.json
