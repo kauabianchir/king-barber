@@ -28,7 +28,7 @@ O build gera `dist/index.html`, JavaScript e CSS estáticos para GitHub Pages. `
 
 ## Banco e autenticação
 
-A estrutura está em `database.sql` e na migração gerada pela CLI em `supabase/migrations/`. Aplique uma vez num projeto novo. As tabelas ficam no schema `private`, com RLS habilitado e sem acesso direto dos papéis de cliente. O único ponto público é `king_api`, um wrapper invoker para a função interna que verifica identidade, titularidade, papel e cada regra de negócio. O papel administrativo vem de `private.admins`; metadados editáveis do usuário não concedem privilégios.
+A estrutura está em `database.sql`. Aplique uma vez num projeto novo. Em uma base já existente, `expense-update.sql` contém a migração de exclusão reversível de despesas; não reaplique o esquema inicial. As tabelas ficam no schema `private`, com RLS habilitado e sem acesso direto dos papéis de cliente. O único ponto público é `king_api`, um wrapper invoker para a função interna que verifica identidade, titularidade, papel e cada regra de negócio. O papel administrativo vem de `private.admins`; metadados editáveis do usuário não concedem privilégios.
 
 Cadastre o administrador pelo formulário da aplicação e confirme o e-mail. Depois, pelo painel administrativo do banco, adicione o UUID verificado à tabela `private.admins`. Não existe autoatribuição de administrador e nenhum usuário recebe acesso administrativo apenas por informar um e-mail na interface.
 
@@ -43,3 +43,9 @@ GitHub Pages serve a interface; Supabase mantém autenticação, regras e dados.
 Testes de domínio e calendário verificam duração, antecedência, funcionamento, domingo, financeiro e posicionamento semanal. Os testes Postgres executam a estrutura real em PGlite, com identidades sintéticas, verificando autorização, isolamento, ocupação única, rollback de colisões, sinais, cancelamento, despesas, notificações e expiração. Eles complementam a validação do projeto hospedado com contas reais.
 
 Projeto acadêmico de Kauã Bianchi e Mateus Portela.
+
+## Revisão e aceite
+
+Consulte `REVISAO.md` para o roteiro de verificação da dupla e a Definition of Done.
+
+Sistema: https://kauabianchir.github.io/king-barber/
