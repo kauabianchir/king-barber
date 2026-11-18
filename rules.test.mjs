@@ -24,3 +24,8 @@ test('cliente pode cancelar reserva pendente e confirmada',()=>{assert.ok(canTra
 test('conclusão exige confirmado e horário iniciado',()=>{assert.ok(!canTransition('pending','completed',now));assert.ok(!canTransition('confirmed','completed','2026-11-18T10:00:00Z',now));assert.ok(canTransition('confirmed','completed','2026-11-16T10:00:00Z',now));});
 test('sinal não é somado duas vezes à receita',()=>{const s=summarize([{status:'completed',price:5000,deposit:1250,paid_at:'x'},{status:'pending',price:5000,deposit:1250}], [{amount:1000}],2);assert.equal(s.revenue,5000);assert.equal(s.profit,4000);assert.equal(s.daily,2000);});
 test('fuso de Brasília preserva o dia local',()=>assert.equal(localDay(new Date('2026-11-18T01:00:00Z')),'2026-11-17'));
+
+import {financialRange} from './rules.mjs';
+test('Financeiro conta dias inclusivos sem depender do fuso local',()=>{assert.equal(financialRange('2026-11-01','2026-11-17').days,17);assert.equal(financialRange('2026-11-17','2026-11-17').days,1);assert.equal(financialRange('2024-02-28','2024-03-01').days,3);});
+test('Financeiro rejeita datas vazias e inexistentes',()=>{for(const [from,to] of [['','2026-11-17'],['2026-11-01',''],['2026-02-30','2026-03-01']]){const result=financialRange(from,to);assert.equal(result.valid,false);assert.equal(result.days,0);}});
+test('Financeiro rejeita período invertido antes de calcular métricas',()=>{const result=financialRange('2026-11-18','2026-11-17');assert.equal(result.valid,false);assert.match(result.error,/inicial/);});

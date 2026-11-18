@@ -41,3 +41,8 @@ export function summarize(bookings,expenses,days){
  const done=bookings.filter(b=>b.status==='completed'),revenue=done.reduce((a,b)=>a+b.price,0),cost=expenses.reduce((a,b)=>a+b.amount,0);
  return {revenue,cost,profit:revenue-cost,daily:(revenue-cost)/Math.max(days,1),deposits:bookings.filter(b=>b.paid_at&&b.status!=='completed').reduce((a,b)=>a+b.deposit,0),completed:done.length};
 }
+export function financialRange(from,to){
+ if(!validDay(from)||!validDay(to))return {valid:false,days:0,error:'Preencha as duas datas do período.'};
+ if(from>to)return {valid:false,days:0,error:'A data inicial deve ser igual ou anterior à data final.'};
+ return {valid:true,days:Math.round((Date.parse(to)-Date.parse(from))/86400000)+1,error:''};
+}
