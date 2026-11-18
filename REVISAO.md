@@ -1,12 +1,12 @@
 # Revisão e aceite - King Barber
 
-PR: correção do filtro financeiro. A revisão humana ainda deve ser realizada por outro integrante.
+Revisão técnica: inspeção de código e execução de testes. Revisão independente por outro integrante da squad: ainda não registrada.
 
 ## Alteração para revisar
 
 Ao apagar uma data do período, o financeiro podia produzir uma média inválida. Agora datas vazias, inexistentes ou invertidas interrompem o cálculo e exibem uma orientação. O período conta os dois extremos, inclusive anos bissextos. A alteração está em App.tsx, rules.mjs e rules.test.mjs. Os arquivos index.html e app-*.js acompanham o build do GitHub Pages.
 
-## Revisão de código por Mateus
+## Itens de revisão da squad
 
 - Conferir financialRange: datas reais, ordem e contagem inclusiva em dias.
 - Conferir que o painel não mostra valores calculados para um período inválido.
@@ -43,3 +43,23 @@ Registrar para cada caso: data/hora, executor, resultado observado, link/print, 
 - Documentação, Jira e evidências atualizados.
 
 Somente então marcar a história como Concluída.
+
+## Ajustes encontrados na inspeção técnica
+
+- Validar o período financeiro antes de renderizar valores.
+- Disponibilizar saída da conta no cabeçalho em telas pequenas.
+- Considerar a duração do serviço ao invalidar a consulta de horários.
+- Limpar dados exibidos quando a sessão deixa de ser válida.
+- Tratar falha de saída com orientação ao usuário.
+- Remover textos de bastidor da interface, preservando instruções úteis sobre pagamento manual.
+- Atualizar a disponibilidade após reserva, cancelamento e atualização dos dados, preservando a seleção somente enquanto o horário continuar livre.
+- Impedir solicitação quando a atualização remover o horário escolhido.
+- Corrigir contraste do botão de saída na barra lateral do tema claro.
+
+## Conferência de interface em 18/11/2026
+
+Dez cenários aprovados no Chrome local: reserva e liberação após cancelamento; sinal em reais; persistência do tema; seletor do Dia do Noivo; período financeiro vazio; adição/exclusão/restauração de despesa; leitura de notificações; navegação semanal; cabeçalho móvel; saída da conta. Sem erros JavaScript observados. A execução usa um adaptador de dados sintéticos local; não representa um teste de gravação no Supabase hospedado. Os testes Postgres verificam separadamente as regras reais do banco em ambiente isolado.
+
+Kauã informou em 18/11/2026 que ele e Mateus analisaram o código e o projeto nas aulas e se reuniram nos fins de semana de novembro. O relato documenta colaboração; não identifica uma aprovação formal do PR #1 nem uma revisão específica com achados atribuídos ao Mateus.
+
+Estes apontamentos resultam da inspeção técnica. Não equivalem a uma revisão realizada por Mateus ou a uma retrospectiva da dupla.
