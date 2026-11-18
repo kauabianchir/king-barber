@@ -36,7 +36,7 @@ Configure a Site URL e as Redirect URLs de autenticação para o endereço de pu
 
 ## Publicação
 
-GitHub Pages serve a interface; Supabase mantém autenticação, regras e dados. Os arquivos publicados não contêm senhas. O banco local dos testes é isolado e não modifica o projeto hospedado. Os preços de combo e Dia do Noivo são exemplos ajustáveis pela administração; o Dia do Noivo é exclusivo aos domingos.
+GitHub Pages serve a interface; Supabase mantém autenticação, regras e dados. Os arquivos publicados não contêm senhas. O banco local dos testes é isolado e não modifica o projeto hospedado. Os preços podem ser ajustados pela administração; o Dia do Noivo é exclusivo aos domingos.
 
 ## Testes
 
@@ -46,6 +46,6 @@ Projeto acadêmico de Kauã Bianchi e Mateus Portela.
 
 ## Revisão e aceite
 
-Consulte `REVISAO.md` para o roteiro de verificação da dupla e a Definition of Done.
+Consulte `REVISAO.md` para os achados, alterações e verificações da revisão. O arquivo `GUIA-APRESENTACAO.md` explica as principais funções e sugere uma demonstração em sala.
 
 Sistema: https://kauabianchir.github.io/king-barber/
