@@ -5,7 +5,7 @@ import { formatMoney, formatBookingTime } from './formatters';
 import { useEffect, useState } from 'react';
 import Brand from './Brand';
 import SundayPicker from './SundayPicker';
-import FinanceArrows from './FinanceArrows';
+import FinanceChart from './FinanceChart';
 import { nextSunday } from './sundays.mjs';
 import { api, logout } from './api';
 import AuthPanel from './AuthPanel';
@@ -737,12 +737,7 @@ export default function App() {
                 </div>
                 {range.valid ? (
                   <>
-                    <FinanceArrows
-                      revenue={summary.revenue}
-                      cost={summary.cost}
-                      profit={summary.profit}
-                      daily={summary.daily}
-                    />
+                    <FinanceChart bookings={period} expenses={costs} from={from} to={to} />
                     <div className="stats finance-stats">
                       {[
                         ['FATURAMENTO REALIZADO', summary.revenue],
