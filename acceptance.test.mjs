@@ -85,19 +85,32 @@ try {
     const b = (await api(client)).body.bookings.find((b) => b.id === r.body.id);
     assert.equal(b.price, 7500);
     assert.equal((+new Date(b.end) - +new Date(b.start)) / 60000, 90);
+    let sunday = new Date(day + 'T12:00:00Z');
+    while (sunday.getUTCDay() !== 0) sunday = new Date(+sunday + 86400000);
+    const groomForm = {
+      ...form,
+      service: 'noivo',
+      day: sunday.toISOString().slice(0, 10),
+    };
+    const groom = await api(client, { ...groomForm, time: '14:00' });
+    assert.equal(groom.status, 201);
     assert.equal(
       (
         await api(admin, {
           action: 'service',
           id: 'noivo',
-          price: 35000,
+          price: 36000,
           minutes: 210,
           active: false,
         })
       ).status,
       200
     );
-    assert.equal((await api(client, { ...form, service: 'noivo' })).status, 400);
+    const reservedGroom = (await api(client)).body.bookings.find((b) => b.id === groom.body.id);
+    assert.equal(reservedGroom.price, 35000);
+    assert.equal((+new Date(reservedGroom.end) - +new Date(reservedGroom.start)) / 60000, 180);
+    // Domingo e horário válidos: a rejeição deve ocorrer pelo serviço desativado.
+    assert.equal((await api(client, groomForm)).status, 400);
   });
   await check('Conclusão e falta exigem administrador e estados finais não reabrem', async () => {
     await db.exec('reset role');
@@ -117,6 +130,10 @@ try {
       403
     );
     assert.equal(
+      (await api(client, { action: 'status', id: absent, status: 'absent' })).status,
+      403
+    );
+    assert.equal(
       (await api(admin, { action: 'status', id: done, status: 'completed' })).status,
       200
     );
@@ -126,6 +143,10 @@ try {
     );
     assert.equal(
       (await api(admin, { action: 'status', id: done, status: 'confirmed' })).status,
+      400
+    );
+    assert.equal(
+      (await api(admin, { action: 'status', id: absent, status: 'confirmed' })).status,
       400
     );
     const data = (await api(admin)).body;
