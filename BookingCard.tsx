@@ -1,5 +1,5 @@
 import type { Booking } from './types';
-import { formatMoney, formatBookingDate, formatBookingTime } from './formatters';
+import { formatMoney, formatBookingDate, formatBookingTime, formatPhone } from './formatters';
 const labels: Record<string, string> = {
   pending: 'Aguardando sinal',
   confirmed: 'Confirmado',
@@ -28,7 +28,7 @@ export default function BookingCard({ booking, admin = false, busy, onAction }: 
         </span>
         {admin && (
           <small>
-            {booking.phone} · {formatMoney(booking.price)} · sinal {formatMoney(booking.deposit)}
+            {formatPhone(booking.phone)} · {formatMoney(booking.price)} · sinal {formatMoney(booking.deposit)}
           </small>
         )}
       </div>
