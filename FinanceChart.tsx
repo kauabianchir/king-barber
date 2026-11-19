@@ -38,7 +38,7 @@ export default function FinanceChart({ bookings, expenses, from, to }: {
       </ul>
       <div className="finance-plot">
         <svg viewBox="0 0 780 342" role="img" aria-label="Faturamento, despesas, lucro e média diária em reais ao longo do período">
-          <title>Evolução financeira de {date(from)} a {date(to)}</title>
+          <title>{`Evolução financeira de ${date(from)} a ${date(to)}`}</title>
           <rect x="96" y="28" width="650" height="250" fill="#fffefa" />
           {Array.from({ length: 6 }, (_, i) => {
             const value = low + (high - low) * i / 5;
@@ -53,7 +53,7 @@ export default function FinanceChart({ bookings, expenses, from, to }: {
             <polyline fill="none" stroke={m.color} strokeWidth="2.5" strokeDasharray={m.dash}
               points={points.map((p, i) => `${x(i)},${y(p[m.key])}`).join(' ')} />
             {points.map((p, i) => <circle key={p.from} cx={x(i)} cy={y(p[m.key])} r="3.5" fill={m.color}>
-              <title>{date(p.from)}{p.to !== p.from ? ' a ' + date(p.to) : ''} · {m.label}: {formatMoney(p[m.key])}</title>
+              <title>{`${date(p.from)}${p.to !== p.from ? ' a ' + date(p.to) : ''} · ${m.label}: ${formatMoney(p[m.key])}`}</title>
             </circle>)}
           </g>)}
         </svg>
