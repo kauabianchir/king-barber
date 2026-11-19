@@ -10,7 +10,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build && node finish-build.mjs",
     "check": "tsc --noEmit",
-    "test": "node --test rules.test.mjs calendar.test.mjs && node postgres-tests.mjs"
+    "test": "node --test rules.test.mjs calendar.test.mjs && node postgres-tests.mjs && node acceptance.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.119.0",
